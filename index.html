@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Countdown App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+        }
+        .countdown {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .goal {
+            background-color: #e0e0e0;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mobile Countdown App</h1>
+    <div id="day-countdown" class="countdown"></div>
+    <div id="year-countdown" class="countdown"></div>
+    <div id="enjoyment-time" class="countdown"></div>
+
+    <h2>Daily Goals</h2>
+    <div id="goals"></div>
+
+    <input type="text" id="goal-name" placeholder="Goal Name">
+    <input type="time" id="goal-end" value="23:59">
+    <button onclick="addGoal()">Add Goal</button>
+
+    <script>
+        let goals = [];
+
+        function updateCountdowns() {
+            const now = new Date();
+            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+            
+            const minutesLeftInDay = Math.max(0, Math.floor((endOfDay - now) / (1000 * 60)));
+            document.getElementById('day-countdown').textContent = `Minutes left today: ${minutesLeftInDay}`;
+
+            const endOf2024 = new Date(2024, 11, 31, 23, 59, 59);
+            const minutesLeftIn2024 = Math.max(0, Math.floor((endOf2024 - now) / (1000 * 60)));
+            document.getElementById('year-countdown').textContent = `Minutes left in 2024: ${minutesLeftIn2024}`;
+
+            let totalGoalMinutes = 0;
+            let goalsHtml = '';
+            goals.forEach((goal, index) => {
+                const goalEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 
+                                         goal.end.getHours(), goal.end.getMinutes());
+                const minutesLeft = Math.max(0, Math.floor((goalEnd - now) / (1000 * 60)));
+                totalGoalMinutes += minutesLeft;
+                goalsHtml += `
+                    <div class="goal">
+                        ${goal.name}: ${minutesLeft} min left
+                        <button onclick="resetGoal(${index})">Reset</button>
+                        <button onclick="removeGoal(${index})">Remove</button>
+                    </div>`;
+            });
+            document.getElementById('goals').innerHTML = goalsHtml;
+
+            const enjoymentMinutes = Math.max(0, minutesLeftInDay - totalGoalMinutes);
+            document.getElementById('enjoyment-time').textContent = `Enjoyment time today: ${enjoymentMinutes} min`;
+        }
+
+        function addGoal() {
+            const name = document.getElementById('goal-name').value;
+            const endTime = document.getElementById('goal-end').value;
+            
+            if (name && endTime) {
+                const [hours, minutes] = endTime.split(':');
+                const end = new Date();
+                end.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                if (goals.length < 5) {
+                    goals.push({ name, end });
+                    updateCountdowns();
+                    document.getElementById('goal-name').value = '';
+                    document.getElementById('goal-end').value = '23:59';
+                } else {
+                    alert('Max 5 goals. Remove one first.');
+                }
+            } else {
+                alert('Please fill all fields');
+            }
+        }
+
+        function resetGoal(index) {
+            const now = new Date();
+            goals[index].end = new Date(now.get
